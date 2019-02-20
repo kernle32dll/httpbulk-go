@@ -1,6 +1,8 @@
 package bulk
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -31,4 +33,27 @@ func (r Result) Res() http.Response {
 // Duration returns the amount of time the request took.
 func (r Result) Duration() time.Duration {
 	return r.dur
+}
+
+// UnmarshalResponse unmarshals the http response directly into
+// the provided interface type (remember to provide a reference, not a value!)
+//
+// If the Result did have an error, or something goes wrong while unmarshalling,
+// the error is returned (result error of course taking precedence).
+func (r Result) UnmarshalResponse(target interface{}) error {
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	defer r.Res().Body.Close()
+	body, err := ioutil.ReadAll(r.Res().Body)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, target); err != nil {
+		return err
+	}
+
+	return nil
 }
