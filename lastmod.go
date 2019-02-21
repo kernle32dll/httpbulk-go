@@ -9,9 +9,9 @@ import (
 )
 
 // FetchLastModDatesForUrls fetches the last modification date for multiple urls at once.
-func FetchLastModDatesForUrls(executor Executor, modifyRequest func(r *http.Request) error, urls ...string) ([]time.Time, error) {
+func FetchLastModDatesForUrls(ctx context.Context, executor Executor, modifyRequest func(r *http.Request) error, urls ...string) ([]time.Time, error) {
 	if urls != nil && len(urls) > 0 {
-		initialContext, cancel := context.WithCancel(context.Background())
+		initialContext, cancel := context.WithCancel(ctx)
 		results := executor.AddRequestsWithInterceptor(initialContext, modifyRequest, urls...)
 
 		times := make([]time.Time, len(urls))
