@@ -12,13 +12,14 @@ import (
 func FetchLastModDatesForUrls(ctx context.Context, executor Executor, modifyRequest func(r *http.Request) error, urls ...string) ([]time.Time, error) {
 	if urls != nil && len(urls) > 0 {
 		initialContext, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		results := executor.AddRequestsWithInterceptor(initialContext, modifyRequest, urls...)
 
 		times := make([]time.Time, len(urls))
 		for i, result := range results {
 			lastModified, err := handleResponse(<-result)
 			if err != nil {
-				cancel()
 				return nil, err
 			}
 
