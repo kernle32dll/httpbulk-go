@@ -26,6 +26,6 @@ func TestContextError(t *testing.T) {
 	for _, resultChan := range results {
 		result := <-resultChan
 
-		log.Printf("%s responded with %s", result.Url(), result.Err())
+		log.Printf("%s responded with %s", result.URL(), result.Err())
 	}
 }

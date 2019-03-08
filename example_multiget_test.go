@@ -24,6 +24,6 @@ func TestMultiGet(t *testing.T) {
 	for _, resultChan := range results {
 		result := <-resultChan
 
-		log.Printf("%s responded with %s", result.Url(), result.Res().Status)
+		log.Printf("%s responded with %s", result.URL(), result.Res().Status)
 	}
 }

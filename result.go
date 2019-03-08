@@ -15,8 +15,8 @@ type Result struct {
 	err error
 }
 
-// Url returns the originally requested url. If you want to know the final URL, look at the HTTP response.
-func (r Result) Url() string {
+// URL returns the originally requested url. If you want to know the final URL, look at the HTTP response.
+func (r Result) URL() string {
 	return r.url
 }
 

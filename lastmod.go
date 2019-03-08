@@ -8,9 +8,11 @@ import (
 	"time"
 )
 
-// FetchLastModDatesForUrls fetches the last modification date for multiple urls at once.
-func FetchLastModDatesForUrls(ctx context.Context, executor Executor, modifyRequest func(r *http.Request) error, urls ...string) ([]time.Time, error) {
-	if urls != nil && len(urls) > 0 {
+// FetchLastModDatesForURLs fetches the last modification date for multiple urls at once.
+func FetchLastModDatesForURLs(
+	ctx context.Context, executor Executor, modifyRequest func(r *http.Request) error, urls ...string,
+) ([]time.Time, error) {
+	if len(urls) > 0 {
 		initialContext, cancel := context.WithCancel(ctx)
 		defer cancel()
 
@@ -45,7 +47,7 @@ func handleResponse(r Result) (time.Time, error) {
 	}
 
 	if r.Res().StatusCode != 200 && r.Res().StatusCode != 304 {
-		return time.Time{}, fmt.Errorf("failed to get last-modified date for %s", r.Url())
+		return time.Time{}, fmt.Errorf("failed to get last-modified date for %s", r.URL())
 	}
 
 	return time.Parse(time.RFC1123, r.Res().Header.Get("last-modified"))

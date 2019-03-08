@@ -31,11 +31,11 @@ func TestMultiHash(t *testing.T) {
 		result := <-resultChan
 
 		hash := result.Res().Header.Get("etag")
-		t.Logf("%s hash %s", result.Url(), hash)
+		t.Logf("%s hash %s", result.URL(), hash)
 
 		h.Write([]byte(hash))
 	}
 	hash := h.Sum(nil)
 
-	t.Logf("Final hash: %s", hex.EncodeToString(hash[:]))
+	t.Logf("Final hash: %s", hex.EncodeToString(hash))
 }
