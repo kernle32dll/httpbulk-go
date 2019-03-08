@@ -10,7 +10,7 @@ Download:
 go get github.com/kernle32dll/httpbulk-go
 ```
 
-### Usage
+### Simple usage
 
 First, you have to instantiate a `bulk.Executor`. This is done via `bulk.NewExecutor` (which takes option style parameters).
 
@@ -38,11 +38,31 @@ original `*http.Response`, and `Err()` for getting the error, if any ocured whil
 **Implementation note**: If the context used for the requests is canceled, or exceeds its deadline, the corresponding
 error is propagated in the `Result` object.
 
+### Advanced usage (request interception)
+
 For more control, you can use the `AddRequestsWithInterceptor` method, which allows you to modify the request prior to sending.
 This might be useful for setting headers and/or changing the request type.
 
 ```go
 executor.AddRequestsWithInterceptor(context.Background(), func(r *http.Request) error {
+    // Change the request method to HEAD
+    r.Method = "HEAD"
+    return nil
+}, urls...)
+```
+
+### Advanced usage (future objects)
+
+If you want to safely provide the result of the request to multiple receivers (e.g. multiple go routines), ``bulk.Future``
+is to your rescue. A Future provides a simple ``Get()`` method, which blocks on the first execution to fetch the result from
+the underlining channel, but returns the same result on subsequent calls. Of course, this method is concurrency safe.
+
+To get a `bulk.Future`, use the following two (otherwise semantically identical to their channel counterparts)  methods:
+
+```go
+executor.AddFutureRequests(context.Background(), urls...)
+
+executor.AddFutureRequestsWithInterceptor(context.Background(), func(r *http.Request) error {
     // Change the request method to HEAD
     r.Method = "HEAD"
     return nil
