@@ -51,7 +51,7 @@ func NewExecutor(setters ...Option) Executor {
 	}
 }
 
-// Issues one or more urls to be called. For each call, optional hooks for modifying the request and inspecting the result are executed (if not nil).
+// Issues one or more urls to be called. For each call, optional hooks for modifying the request are executed (if not nil).
 func (e Executor) AddRequestsWithInterceptor(
 	ctx context.Context,
 	modifyRequest func(r *http.Request) error,
