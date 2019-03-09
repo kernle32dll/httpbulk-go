@@ -1,7 +1,9 @@
 package bulk
 
 import (
+	"context"
 	"testing"
+	"time"
 )
 
 // Tests that Done returns false, if the result has not been retrieved yet.
@@ -25,6 +27,56 @@ func Test_Get(t *testing.T) {
 	// then
 	if result != insertResult {
 		t.Error("result received, but was somehow mangled")
+	}
+}
+
+// Tests that GetWithContext with a simple context behaves just like Get.
+func Test_Get_WithContext(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	// when
+	insertResult := Result{url: "test"}
+	resultChan <- insertResult
+	result, err := future.GetWithContext(context.Background())
+
+	// then
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	if result != insertResult {
+		t.Error("result received, but was somehow mangled")
+	}
+}
+
+// Tests that GetWithContext returns the contexts error, if the context
+// errors (deadline exceeded).
+func Test_Get_WithContext_DeadlineExceeded(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	// this context is immediately exceeded
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Hour))
+	defer cancel()
+
+	// when
+	result, err := future.GetWithContext(ctx)
+
+	// then
+	if err != context.DeadlineExceeded {
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	emptyResult := Result{}
+	if result != emptyResult {
+		t.Error("non-empty result received")
+	}
+
+	if future.Done() {
+		t.Error("expectation failed, future is done for error case")
 	}
 }
 
@@ -58,6 +110,26 @@ func Test_Get_Done(t *testing.T) {
 	future.Get()
 
 	// then
+	if !future.Done() {
+		t.Error("result received, but future was not set to done")
+	}
+}
+
+// Tests that Done returns true, after the result was retrieved via GetWithContext.
+func Test_Get_WithContext_Done(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	// when
+	resultChan <- Result{url: "test"}
+	_, err := future.GetWithContext(context.Background())
+
+	// then
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+
 	if !future.Done() {
 		t.Error("result received, but future was not set to done")
 	}

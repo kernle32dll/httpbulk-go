@@ -54,8 +54,9 @@ executor.AddRequestsWithInterceptor(context.Background(), func(r *http.Request) 
 ### Advanced usage (future objects)
 
 If you want to safely provide the result of the request to multiple receivers (e.g. multiple go routines), ``bulk.Future``
-is to your rescue. A Future provides a simple ``Get()`` method, which blocks on the first execution to fetch the result from
-the underlining channel, but returns the same result on subsequent calls. Of course, this method is concurrency safe.
+is to your rescue. A Future provides two simple method for receiving results - ``Get()``  and ``GetWithContext(...)``.
+Both block on the first execution to fetch the result from the underlining channel, but return the same result on subsequent
+calls. Of course, both methods are concurrency safe.
 
 To get a `bulk.Future`, use the following two (otherwise semantically identical to their channel counterparts)  methods:
 
@@ -68,6 +69,9 @@ executor.AddFutureRequestsWithInterceptor(context.Background(), func(r *http.Req
     return nil
 }, urls...)
 ```
+
+``GetWithContext(...)`` can be used to implement an additional safe-guard against deadlocks. But this should be handled
+via the contexts given to the executor, as seen above (although you should not use `context.Background()`!) 
 
 ### Thanks
 
