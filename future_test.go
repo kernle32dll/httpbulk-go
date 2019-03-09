@@ -1,8 +1,21 @@
 package bulk
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"testing"
+	"time"
 )
+
+type sampleObject struct {
+	SomeInt    int    `json:"someInt"`
+	SomeString string `json:"someString"`
+}
 
 // Tests that Done returns false, if the result has not been retrieved yet.
 func Test_Done_BeforeResult(t *testing.T) {
@@ -60,5 +73,144 @@ func Test_Get_Done(t *testing.T) {
 	// then
 	if !future.Done() {
 		t.Error("result received, but future was not set to done")
+	}
+}
+
+type closeRecorder struct {
+	io.ReadCloser
+	isClosed bool
+}
+
+func (closeRecorder *closeRecorder) Close() error {
+	closeRecorder.isClosed = true
+	return closeRecorder.ReadCloser.Close()
+}
+
+type errorCloser struct {
+	closeRecorder
+}
+
+func (errorRecorder *errorCloser) Read(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("expected failure at %d", time.Now().Unix())
+}
+
+// Tests that UnmarshalResponse correctly unmarshalls a given response.
+func Test_UnmarshalResponse(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	referenceObj := sampleObject{SomeInt: 4, SomeString: "test"}
+	referenceBytes, err := json.Marshal(referenceObj)
+	if err != nil {
+		t.Errorf("unexpected error %s", err)
+	}
+
+	closeRecorder := &closeRecorder{ReadCloser: ioutil.NopCloser(bytes.NewReader(referenceBytes))}
+	response := &http.Response{Body: closeRecorder}
+
+	// when
+	resultChan <- Result{res: response}
+
+	var responseObj sampleObject
+	if err := future.UnmarshalResponse(&responseObj); err != nil {
+		t.Errorf("unexpected error %s", err)
+	}
+
+	// then
+	if responseObj != referenceObj {
+		t.Error("result received, but was not like reference object")
+	}
+
+	if !closeRecorder.isClosed {
+		t.Error("http stream was not closed")
+	}
+}
+
+// Tests that UnmarshalResponse correctly unmarshalls subsequent calls.
+func Test_UnmarshalResponse_SubsequentCall(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	referenceObj := sampleObject{SomeInt: 4, SomeString: "test"}
+	referenceBytes, err := json.Marshal(referenceObj)
+	if err != nil {
+		t.Errorf("unexpected error %s", err)
+	}
+
+	closeRecorder := &closeRecorder{ReadCloser: ioutil.NopCloser(bytes.NewReader(referenceBytes))}
+	response := &http.Response{Body: closeRecorder}
+
+	// when
+	resultChan <- Result{res: response}
+
+	var responseObj1, responseObj2 sampleObject
+	if err := future.UnmarshalResponse(&responseObj1); err != nil {
+		t.Errorf("unexpected error %s", err)
+	}
+	if err := future.UnmarshalResponse(&responseObj2); err != nil {
+		t.Errorf("unexpected error %s", err)
+	}
+
+	// then
+	if responseObj1 != referenceObj {
+		t.Error("first result received, but was not like reference object")
+	}
+
+	if responseObj2 != referenceObj {
+		t.Error("second result received, but was not like reference object")
+	}
+
+	if !closeRecorder.isClosed {
+		t.Error("http stream was not closed")
+	}
+}
+
+// Tests that UnmarshalResponse returns the exact error if an error occurred while
+// reading the stream, and subsequent calls return the same error.
+func Test_UnmarshalResponse_ReadError(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	closeRecorder := &errorCloser{closeRecorder: closeRecorder{ReadCloser: ioutil.NopCloser(bytes.NewReader(nil))}}
+	response := &http.Response{Body: closeRecorder}
+
+	// when
+	resultChan <- Result{res: response}
+
+	firstErr := future.UnmarshalResponse(&sampleObject{})
+	if firstErr == nil {
+		t.Error("expected error, but non occured")
+	}
+
+	secondErr := future.UnmarshalResponse(&sampleObject{})
+
+	// then
+	if !closeRecorder.isClosed {
+		t.Error("http stream was not closed")
+	}
+
+	if firstErr != secondErr {
+		t.Error("subsequent calls did not return the same error")
+	}
+}
+
+// Tests that UnmarshalResponse returns the exact error of the result, if existing
+func Test_UnmarshalResponse_ResultError(t *testing.T) {
+	// given
+	resultChan := make(chan Result, 1)
+	future := Future{resultChan: resultChan}
+
+	referenceErr := errors.New("expected error")
+
+	// when
+	resultChan <- Result{err: referenceErr}
+	err := future.UnmarshalResponse(&sampleObject{})
+
+	// then
+	if err != referenceErr {
+		t.Errorf("expected result error, received unexpected error %s", err)
 	}
 }

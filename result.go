@@ -35,8 +35,8 @@ func (r Result) Duration() time.Duration {
 	return r.dur
 }
 
-// UnmarshalResponse unmarshals the http response directly into
-// the provided interface type (remember to provide a reference, not a value!)
+// UnmarshalResponse unmarshals the http response directly into the provided interface
+// type (remember to provide a reference, not a value!), and closes the stream afterwards.
 //
 // If the Result did have an error, or something goes wrong while unmarshalling,
 // the error is returned (result error of course taking precedence).
