@@ -28,7 +28,7 @@ func (e *Executor) Close() {
 }
 
 // NewExecutor instantiates a new Executor.
-func NewExecutor(setters ...Option) Executor {
+func NewExecutor(setters ...Option) *Executor {
 	// Default Options
 	args := &Options{
 		ConcurrencyLimit: 10,
@@ -45,7 +45,7 @@ func NewExecutor(setters ...Option) Executor {
 		semaphoreChan = make(chan struct{}, args.ConcurrencyLimit)
 	}
 
-	return Executor{
+	return &Executor{
 		client:        args.Client,
 		semaphoreChan: semaphoreChan,
 	}
@@ -53,7 +53,7 @@ func NewExecutor(setters ...Option) Executor {
 
 // Issues one or more urls to be called.
 // For each call, optional hooks for modifying the request are executed (if not nil).
-func (e Executor) AddRequestsWithInterceptor(
+func (e *Executor) AddRequestsWithInterceptor(
 	ctx context.Context,
 	modifyRequest func(r *http.Request) error,
 	urls ...string,
@@ -67,7 +67,7 @@ func (e Executor) AddRequestsWithInterceptor(
 }
 
 // Issues one or more urls to be called.
-func (e Executor) AddRequests(
+func (e *Executor) AddRequests(
 	ctx context.Context,
 	urls ...string,
 ) []chan Result {
@@ -80,24 +80,24 @@ func (e Executor) AddFutureRequestsWithInterceptor(
 	ctx context.Context,
 	modifyRequest func(r *http.Request) error,
 	urls ...string,
-) []Future {
-	results := make([]Future, len(urls))
+) []*Future {
+	results := make([]*Future, len(urls))
 	for i, url := range urls {
-		results[i] = Future{resultChan: e.addRequestInternal(ctx, modifyRequest, url)}
+		results[i] = &Future{resultChan: e.addRequestInternal(ctx, modifyRequest, url)}
 	}
 
 	return results
 }
 
 // Issues one or more urls to be called and wrapped in a bulk.Future.
-func (e Executor) AddFutureRequests(
+func (e *Executor) AddFutureRequests(
 	ctx context.Context,
 	urls ...string,
-) []Future {
+) []*Future {
 	return e.AddFutureRequestsWithInterceptor(ctx, nil, urls...)
 }
 
-func (e Executor) addRequestInternal(
+func (e *Executor) addRequestInternal(
 	ctx context.Context,
 	modifyRequest func(r *http.Request) error,
 	url string,
