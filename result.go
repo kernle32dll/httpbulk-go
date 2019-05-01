@@ -51,9 +51,5 @@ func (r Result) UnmarshalResponse(target interface{}) error {
 		return err
 	}
 
-	if err := json.Unmarshal(body, target); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(body, target)
 }
