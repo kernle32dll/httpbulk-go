@@ -115,7 +115,7 @@ func (e Executor) addRequestInternal(
 		}
 
 		var result Result
-		if req, err := http.NewRequest("GET", url, nil); err == nil {
+		if req, err := http.NewRequest(http.MethodGet, url, nil); err == nil {
 			doSend := true
 			if modifyRequest != nil {
 				if err := modifyRequest(req); err != nil {
@@ -128,8 +128,7 @@ func (e Executor) addRequestInternal(
 				start := time.Now()
 
 				// send the request and put the response in a result struct
-				// along with the index so we can sort them later along with
-				// any error that might have occurred
+				// along with any error that might have occurred
 				res, err := ctxhttp.Do(ctx, e.client, req)
 				result = Result{url, res, time.Since(start), err}
 			}
