@@ -1,4 +1,4 @@
-package bulk_test
+package examples_test
 
 import (
 	"github.com/kernle32dll/httpbulk-go"
