@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.com/kernle32dll/httpbulk-go.svg?branch=master)](https://travis-ci.com/kernle32dll/httpbulk-go)
+[![GoDoc](https://godoc.org/github.com/kernle32dll/httpbulk-go?status.svg)](http://godoc.org/github.com/kernle32dll/httpbulk-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kernle32dll/httpbulk-go)](https://goreportcard.com/report/github.com/kernle32dll/httpbulk-go)
+[![codecov](https://codecov.io/gh/kernle32dll/httpbulk-go/branch/master/graph/badge.svg)](https://codecov.io/gh/kernle32dll/httpbulk-go)
+
 # httpbulk-go
 
 httpbulk-go is a small wrapper lib, intended to ease the parallel loading of multiple http resources.
