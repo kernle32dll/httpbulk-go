@@ -1,7 +1,7 @@
 package examples_test
 
 import (
-	"github.com/kernle32dll/httpbulk-go"
+	bulk "github.com/kernle32dll/httpbulk-go"
 
 	"context"
 	"log"

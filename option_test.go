@@ -2,6 +2,7 @@ package bulk_test
 
 import (
 	bulk "github.com/kernle32dll/httpbulk-go"
+
 	"net/http"
 	"testing"
 )

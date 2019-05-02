@@ -1,8 +1,9 @@
 package bulk
 
 import (
-	"context"
 	"golang.org/x/net/context/ctxhttp"
+
+	"context"
 	"net/http"
 	"time"
 )
