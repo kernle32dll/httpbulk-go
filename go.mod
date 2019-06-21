@@ -1,3 +1,3 @@
 module github.com/kernle32dll/httpbulk-go
 
-require golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+require golang.org/x/net v0.0.0-20190620200207-3b0461eec859
