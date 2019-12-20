@@ -1,8 +1,6 @@
 package bulk
 
 import (
-	"golang.org/x/net/context/ctxhttp"
-
 	"context"
 	"net/http"
 	"time"
@@ -130,7 +128,7 @@ func (e Executor) addRequestInternal(
 
 				// send the request and put the response in a result struct
 				// along with any error that might have occurred
-				res, err := ctxhttp.Do(ctx, e.client, req)
+				res, err := e.client.Do(req.WithContext(ctx))
 				result = Result{url, res, time.Since(start), err}
 			}
 		} else {
