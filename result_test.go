@@ -62,7 +62,7 @@ func Test_Result_Getters(t *testing.T) {
 		t.Error("getter for duration broken")
 	}
 
-	if result.Err() != testError {
+	if !errors.Is(result.Err(), testError) {
 		t.Error("getter for error broken")
 	}
 }
@@ -127,7 +127,7 @@ func Test_Result_UnmarshalResponse_ResultError(t *testing.T) {
 	err := result.UnmarshalResponse(&sampleObject{})
 
 	// then
-	if err != referenceErr {
+	if !errors.Is(err, referenceErr) {
 		t.Errorf("expected result error, received unexpected error %s", err)
 	}
 }

@@ -2,10 +2,15 @@ package bulk
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+)
+
+var (
+	ErrRequestFailed = errors.New("http request failed")
 )
 
 // FetchLastModDatesForURLs fetches the last modification date for multiple urls at once.
@@ -42,12 +47,12 @@ func handleResponse(r Result) (time.Time, error) {
 		return time.Time{}, err
 	}
 
-	if r.Res().StatusCode == 404 {
+	if r.Res().StatusCode == http.StatusNotFound {
 		return time.Unix(0, 0), nil
 	}
 
-	if r.Res().StatusCode != 200 && r.Res().StatusCode != 304 {
-		return time.Time{}, fmt.Errorf("failed to get last-modified date for %s", r.URL())
+	if r.Res().StatusCode != http.StatusOK && r.Res().StatusCode != http.StatusNotModified {
+		return time.Time{}, fmt.Errorf("failed to get last-modified date for %s: %w", r.URL(), ErrRequestFailed)
 	}
 
 	return time.Parse(time.RFC1123, r.Res().Header.Get("last-modified"))
