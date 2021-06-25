@@ -50,7 +50,7 @@ func NewExecutor(setters ...Option) Executor {
 	}
 }
 
-// Issues one or more urls to be called.
+// AddRequestsWithInterceptor issues one or more urls to be called.
 // For each call, optional hooks for modifying the request are executed (if not nil).
 func (e Executor) AddRequestsWithInterceptor(
 	ctx context.Context,
@@ -65,7 +65,7 @@ func (e Executor) AddRequestsWithInterceptor(
 	return results
 }
 
-// Issues one or more urls to be called.
+// AddRequests issues one or more urls to be called.
 func (e Executor) AddRequests(
 	ctx context.Context,
 	urls ...string,
@@ -73,7 +73,7 @@ func (e Executor) AddRequests(
 	return e.AddRequestsWithInterceptor(ctx, nil, urls...)
 }
 
-// Issues one or more urls to be called and wrapped in a bulk.Future.
+// AddFutureRequestsWithInterceptor issues one or more urls to be called and wrapped in a bulk.Future.
 // For each call, optional hooks for modifying the request are executed (if not nil).
 func (e Executor) AddFutureRequestsWithInterceptor(
 	ctx context.Context,
@@ -88,7 +88,7 @@ func (e Executor) AddFutureRequestsWithInterceptor(
 	return results
 }
 
-// Issues one or more urls to be called and wrapped in a bulk.Future.
+// AddFutureRequests i one or more urls to be called and wrapped in a bulk.Future.
 func (e Executor) AddFutureRequests(
 	ctx context.Context,
 	urls ...string,

@@ -2,7 +2,7 @@ package bulk
 
 import "net/http"
 
-// Option is the option-wrapper for defining the workings of an Executor
+// Options is the option-wrapper for defining the workings of an Executor
 type Options struct {
 	ConcurrencyLimit int
 	Client           *http.Client
