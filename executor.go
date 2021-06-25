@@ -27,7 +27,7 @@ func (e Executor) Close() {
 }
 
 // NewExecutor instantiates a new Executor.
-func NewExecutor(setters ...Option) Executor {
+func NewExecutor(setters ...Option) *Executor {
 	// Default Options
 	args := &Options{
 		ConcurrencyLimit: 10,
@@ -44,7 +44,7 @@ func NewExecutor(setters ...Option) Executor {
 		semaphoreChan = make(chan struct{}, args.ConcurrencyLimit)
 	}
 
-	return Executor{
+	return &Executor{
 		client:        args.Client,
 		semaphoreChan: semaphoreChan,
 	}

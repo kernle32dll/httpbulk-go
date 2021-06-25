@@ -15,7 +15,7 @@ var (
 
 // FetchLastModDatesForURLs fetches the last modification date for multiple urls at once.
 func FetchLastModDatesForURLs(
-	ctx context.Context, executor Executor, modifyRequest func(r *http.Request) error, urls ...string,
+	ctx context.Context, executor *Executor, modifyRequest func(r *http.Request) error, urls ...string,
 ) ([]time.Time, error) {
 	if len(urls) > 0 {
 		initialContext, cancel := context.WithCancel(ctx)
